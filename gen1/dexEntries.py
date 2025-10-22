@@ -1,8 +1,5 @@
 import os 
 import json
-# TODO: evomoves
-
-
 
 gamePath = "dexProjectDataminer/ThirdParty/gen1/pokered"
 
