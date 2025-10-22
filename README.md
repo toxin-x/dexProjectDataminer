@@ -1,4 +1,19 @@
-tesk check
-- [x] #739
-- [ ] https://github.com/octo-org/octo-repo/issues/740
-- [ ] Add delight to the experience when all tasks are complete :tada:
+## gen 1
+### R&B
+#### Get Pokemon 
+- [ ] Wild
+  - [ ] event pokemon (like legendaries and snorlax) 
+- [ ] Gift
+  - [ ] Starter
+  - [ ] MtMoon Magikarp
+  - [ ] Mansion eevee
+  - [ ] Silph 7f Lapris
+  - [ ] game corner 
+  - [ ] dojo
+  - [ ] lab fossils
+- [ ] Trade
+
+
+
+#### Get Moves
+

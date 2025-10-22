@@ -1,9 +1,13 @@
 import os 
+import json
+# TODO: evomoves
 
-# TODO: evomoves, growthrates
+
+
+gamePath = "dexProjectDataminer/ThirdParty/gen1/pokered"
 
 #get dex ids
-with open("dexProjectDataminer/ThirdParty/gen1/pokered/constants/pokedex_constants.asm", "r") as dex_constants:
+with open(gamePath + "/constants/pokedex_constants.asm", "r") as dex_constants:
     dexConstants = {}
     dexNum = 1
     for i in dex_constants:
@@ -12,7 +16,7 @@ with open("dexProjectDataminer/ThirdParty/gen1/pokered/constants/pokedex_constan
             dexNum += 1
 
 #get internal ids
-with open("dexProjectDataminer/ThirdParty/gen1/pokered/data/pokemon/dex_order.asm", "r") as dex_order:
+with open(gamePath + "/data/pokemon/dex_order.asm", "r") as dex_order:
     dexOrder = {}
     currentID = 1
     for i in dex_order:
@@ -21,10 +25,53 @@ with open("dexProjectDataminer/ThirdParty/gen1/pokered/data/pokemon/dex_order.as
             currentID += 1
 
 
+#evo moves
+with open(gamePath + "/data/pokemon/evos_moves.asm", "r") as evo_moves:
+    evoMovesList = list(evo_moves)
+    evoMovesSplitList = []
+    currentID = 1
+    prevLine = 0
+    for i, line in enumerate(evoMovesList):
+        if line.endswith("EvosMoves:\n") or i == (len(evoMovesList) - 1):
+                evoMovesSplitList.append(evoMovesList[prevLine:i-1])
+                prevLine = i
+    
+    evoMoves = {}
+    for i, mon in enumerate(evoMovesSplitList):
+        evo = True
+        evos = []
+        moves = []
+        line = ""
+
+        for j in mon:
+            if j.startswith("\tdb"):
+                line = j.replace("\n", "").replace(",", "").split(" ")
+                if line[1] == "0":
+                    evo = False
+                
+                elif evo == True:
+                    buildEvo = {"evo_method": line[1], "species": line[-1]}
+                    if line[1] == "EVOLVE_LEVEL":
+                        buildEvo["level"] = line[2]
+                    elif line[1] == "EVOLVE_ITEM":
+                        buildEvo["item"] = line[2]
+                    elif line[1] == "EVOLVE_TRADE":
+                        pass #every pokemon's evo trade minimum level is 1
+                    evos.append(buildEvo)
+                else:
+                    moves.append({"level": line[1], "move": line[2]})
+        evoMoves[i] = [evos, moves]
+              
+                
+                 
+            
+    
+
+
 
 #stats 
 baseStats= {}
-parentDir = "dexProjectDataminer/ThirdParty/gen1/pokered/data/pokemon/base_stats/"
+parentDir = gamePath + "/data/pokemon/base_stats/"
 for baseStatFile in os.listdir(parentDir):
     with open(parentDir + baseStatFile, "r") as baseStatStream:
         BaseStat = list(baseStatStream)
@@ -44,7 +91,7 @@ for baseStatFile in os.listdir(parentDir):
                 elif dbCount == 2:
                     #set stats
                     currentEntry["hp"] = line[1]
-                    currentEntry["atack"] = line[2].strip(",")
+                    currentEntry["attack"] = line[2].strip(",")
                     currentEntry["defense"] = line[3].strip(",")
                     currentEntry["speed"] = line[4].strip(",")
                     currentEntry["special"] = line[5].strip(",")
@@ -100,7 +147,7 @@ for i in dexOrder:
         internalToDex[i] = dexConstants[dexOrder[i]]
 
 #get names
-with open("dexProjectDataminer/ThirdParty/gen1/pokered/data/pokemon/names.asm", "r") as pokemon_names:
+with open(gamePath + "/data/pokemon/names.asm", "r") as pokemon_names:
     names = {}
     internalID = 1
     for i in pokemon_names:
@@ -109,7 +156,7 @@ with open("dexProjectDataminer/ThirdParty/gen1/pokered/data/pokemon/names.asm", 
             internalID += 1
 
 #get dex text
-with open ("dexProjectDataminer/ThirdParty/gen1/pokered/data/pokemon/dex_text.asm") as dex_text:
+with open (gamePath + "/data/pokemon/dex_text.asm") as dex_text:
     dexText = {}
     currentText = ""
     fullText = ""
@@ -122,21 +169,21 @@ with open ("dexProjectDataminer/ThirdParty/gen1/pokered/data/pokemon/dex_text.as
         elif i != "\n":
             fullText += i.split('"')[1] + " "
 #open dex entries
-with open("dexProjectDataminer/ThirdParty/gen1/pokered/data/pokemon/dex_entries.asm", "r") as dex_entries:
+with open(gamePath + "/data/pokemon/dex_entries.asm", "r") as dex_entries:
     dexEntries = list(dex_entries)
-    dex = {}
+    preDex = {}
     internalID= 1
     for i, j in enumerate(dexEntries):
         #set internal ids 
         if "DexEntry\n" in j and "text_far" not in j:
             if "MissingNoDexEntry" not in j:
-                dex[j.split(" ")[1][:-1]] = {"internalID": internalID}
+                preDex[j.split(" ")[1][:-1]] = {"internalID": internalID}
             internalID += 1
         
         #get dex entry
         if "DexEntry:" in j and j != "MissingNoDexEntry:\n":
             # 
-            currentEntry = dex[j[:-2]]
+            currentEntry = preDex[j[:-2]]
             
             
             
@@ -151,14 +198,31 @@ with open("dexProjectDataminer/ThirdParty/gen1/pokered/data/pokemon/dex_entries.
             currentEntry["height"] = (int(feet) * 12) + int(inches)
             # set weight to be everything after dw three lines after the header
             currentEntry["weight"] = int(dexEntries[i+3].split(" ")[1][:-1])
-            
-            
+             
             currentEntry["name"] = names[currentEntry["internalID"]]
             
             currentEntry["ID"] = internalToDex[currentEntry["internalID"]]
             
             currentEntry["text"] = dexText[dexEntries[i+4].split(" ")[1][:-1]]
             stats = baseStats[currentEntry["ID"]]
+            
             for stat in stats:
                 currentEntry[stat] = stats[stat]
-    print(dex)
+            currentEntry["evolutions"], currentEntry["moves"] = evoMoves[currentEntry["internalID"]]
+
+#resort dict by pokedex number instead of internal number
+#yes i know this is stupid i am writing this while sick
+dexNums = {}
+for i in preDex:
+    dexNums[preDex[i].pop("ID")] = preDex[i] 
+
+dex = {}
+i=1
+while i < len(dexNums):
+    dex[i] = dexNums[i]
+    i += 1
+
+
+with open ("gen1/pokered/pokemon.json", "w") as dump:
+    json.dump(dex, dump)
+
