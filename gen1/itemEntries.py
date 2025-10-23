@@ -82,9 +82,17 @@ with open(gamePath + "/data/items/tm_prices.asm") as tm_prices:
             item_id += 1
     print(tmPrices)
 
+hmsList = {}
+for i in hms:
+    hmsList[i] = {"move": hms[i]}
+tmsList = {}
 for i in tms:
-    print(tms[i], tmPrices[i])
-    
+    tmsList[i] = {"move":tms[i],"price": tmPrices[i]}
+
+itemsList = {}
 for i in items:
     if i != 0:
-        print(items[i], names[i], prices[i], keyItems[i], "\n\n")
+        itemsList[i] = {"item": items[i], "name": names[i], "price": prices[i], "isKeyItem": keyItems[i]}
+        
+with open("gen1/items.json", "w") as output:
+    print(json.dumps(itemsList))
