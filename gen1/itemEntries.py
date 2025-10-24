@@ -96,3 +96,9 @@ for i in items:
         
 with open("gen1/items.json", "w") as output:
     print(json.dumps(itemsList))
+
+with open("gen1/hms.json", "w") as output:
+    print(json.dumps(hmsList))
+
+with open("gen1/tms.json", "w") as output:
+    print(json.dumps(tmsList))
