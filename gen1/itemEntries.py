@@ -94,11 +94,11 @@ for i in items:
     if i != 0:
         itemsList[i] = {"item": items[i], "name": names[i], "price": prices[i], "isKeyItem": keyItems[i]}
         
-with open("gen1/items.json", "w") as output:
+with open("gen1/pokered/items.json", "w") as output:
     print(json.dumps(itemsList))
 
-with open("gen1/hms.json", "w") as output:
+with open("gen1/pokered/hms.json", "w") as output:
     print(json.dumps(hmsList))
 
-with open("gen1/tms.json", "w") as output:
+with open("gen1/pokered/tms.json", "w") as output:
     print(json.dumps(tmsList))
