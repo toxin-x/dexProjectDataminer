@@ -95,10 +95,10 @@ for i in items:
         itemsList[i] = {"item": items[i], "name": names[i], "price": prices[i], "isKeyItem": keyItems[i]}
         
 with open("gen1/pokered/items.json", "w") as output:
-    print(json.dumps(itemsList))
+    json.dump(itemsList, output)
 
 with open("gen1/pokered/hms.json", "w") as output:
-    print(json.dumps(hmsList))
+    json.dump(hmsList, output)
 
 with open("gen1/pokered/tms.json", "w") as output:
-    print(json.dumps(tmsList))
+    json.dump(tmsList, output)
